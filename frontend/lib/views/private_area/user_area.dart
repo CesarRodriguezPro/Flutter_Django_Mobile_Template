@@ -12,8 +12,8 @@ class UserArea extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('User Area'),
+              children: const [
+                Text('User Area'),
               ],
             )
           ],

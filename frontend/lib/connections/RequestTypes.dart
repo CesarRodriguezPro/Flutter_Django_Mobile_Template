@@ -1,45 +1,67 @@
+// ignore_for_file: file_names
 import 'dart:developer';
 import '../database/db.dart';
-import './BasicUrl.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import '../url_base.dart';
 
 
-Future<http.StreamedResponse> getRequest(String urlExtension)async{
-  String apiKeySaved = await getApiKey();
-  var headers = {
-    'Authorization': 'TOKEN $apiKeySaved'
-  };
+Future<Response> getRequest(String urlExtension)async{
+  // settings
+  var key = await getApiKey();
+  var url = "$basicUrl/apiUrl";
 
-  var request = http.Request('GET', Uri.parse('$rootApi/$urlExtension'));
-  request.headers.addAll(headers);
-  http.StreamedResponse response = await request.send();
+  // sending request
+  var dio = Dio();
+  Response response = await dio.post(url,
+    options: Options(
+      headers: {'Authorization': 'TOKEN $key'},
+    ),
+  );
   return response;
 }
 
 
-Future<http.StreamedResponse> postRequest({required String apiUrl, required Map<String,String> data})async{
-  var request = http.MultipartRequest('POST', Uri.parse('$rootApi/$apiUrl'));
-  String apiKeySaved = await getApiKey();
+Future<Response> postRequest({required String apiUrl, required Map<String,String> data})async{
+  // settings
+  var key = await getApiKey();
+  var url = "$basicUrl/apiUrl";
 
-  request.headers.addAll({
-    'Authorization': 'TOKEN $apiKeySaved'
-  });
-  request.fields.addAll(data);
-  http.StreamedResponse response = await request.send();
+  // getting data
+  FormData data_ = FormData.fromMap(data);
+
+  // sending request
+  var dio = Dio();
+  Response response = await dio.post(url,
+    data: data_,
+    options: Options(
+      headers: {'Authorization': 'TOKEN $key'},
+    ),
+  );
   return response;
 }
 
 
-Future<http.StreamedResponse> apiRequestWithPassword(String username, String password)async{
-  var request = http.MultipartRequest('POST', Uri.parse('http://localhost:8000/api-token-auth/'));
+Future<Response> apiRequestWithPassword(String username, String password)async{
+  // settings
+  var url = "$basicUrl/api-token-auth/";
 
-  request.fields.addAll({
+  // getting data
+  FormData data_ = FormData.fromMap({
     'username': username,
     'password': password
   });
 
-  http.StreamedResponse response = await request.send();
+
+  // sending request
+  var dio = Dio();
+  Response response = await dio.post(url,
+    data: data_,
+    options: Options(
+    followRedirects: false,
+    validateStatus: (status)=> status! < 500,
+  ));
   return response;
-}
+  }
+
 
 
